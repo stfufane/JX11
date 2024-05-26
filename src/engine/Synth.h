@@ -14,7 +14,7 @@ namespace JX11::Engine
 class Synth
 {
 public:
-    Synth();
+    Synth() = default;
 
     void allocateResources(double sampleRate, int samplesPerBlock);
     void deallocateResources();
@@ -138,7 +138,7 @@ private:
     bool isPlayingLegatoStyle() const;
 
     // The current sample rate.
-    float sampleRate;
+    float sampleRate = 44100.0f;
 
     // List of the active voices.
     std::array<Voice, MAX_VOICES> voices;

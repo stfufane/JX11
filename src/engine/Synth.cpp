@@ -5,11 +5,6 @@ namespace JX11::Engine
 
 static const float ANALOG = 0.002f; // oscillator drift
 
-Synth::Synth()
-{
-    sampleRate = 44100.0f;
-}
-
 void Synth::allocateResources(double sampleRate_, int /*samplesPerBlock*/)
 {
     sampleRate = static_cast<float>(sampleRate_);
@@ -283,9 +278,6 @@ void Synth::noteOff(size_t note)
 
     // We get here in polyphonic mode, or when a key was released that is
     // not currently playing in monophonic mode.
-    // We also get here when the sustain pedal is released. In that case,
-    // the note number is -1 (SUSTAIN).
-
     for (auto& voice : voices) {
         // Any voices playing this note?
         if (voice.note == note) {
@@ -470,10 +462,7 @@ void Synth::shiftQueuedNotes()
 
 std::optional<size_t> Synth::nextQueuedNote()
 {
-    // Are there any older notes queued? Note that some of these may have
-    // been released in the mean time, in which case `voice.note` was set
-    // to 0 or SUSTAIN (in the loop from the else clause below). This means
-    // notes kept alive only by the sustain pedal are not restored.
+    // Are there any older notes queued?
     size_t held = 0;
     for (size_t v = MAX_VOICES - 1; v > 0; v--) {
         if (voices[v].note.has_value() && !voices[v].sustained) {
@@ -495,7 +484,7 @@ std::optional<size_t> Synth::nextQueuedNote()
 bool Synth::isPlayingLegatoStyle() const
 {
     return std::any_of(voices.begin(), voices.end(), [](const auto& voice) {
-        return voice.note.has_value() && !voice.sustained;
+        return voice.note.has_value();
     });
 }
 

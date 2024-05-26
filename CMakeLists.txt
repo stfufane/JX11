@@ -25,6 +25,13 @@ CPMAddPackage(
     SOURCE_DIR ${LIB_DIR}/juce
 )
 
+CPMAddPackage(
+    NAME melatonin_perfetto
+    GIT_TAG main
+    GITHUB_REPOSITORY sudara/melatonin_perfetto
+    SOURCE_DIR ${LIB_DIR}/melatonin_perfetto
+)
+
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
 if(MSVC)
@@ -97,6 +104,7 @@ target_link_libraries(${PROJECT_NAME}
     juce_dsp
     juce_audio_utils
     juce_gui_extra
+    Melatonin::Perfetto
     PUBLIC
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags

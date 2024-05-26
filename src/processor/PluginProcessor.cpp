@@ -7,9 +7,22 @@ namespace JX11::Processor
 Jx11AudioProcessor::Jx11AudioProcessor()
     : mParams(*this)
 {
+#if PERFETTO
+    MelatoninPerfetto::get().beginSession();
+#endif
     for (auto& param : getParameters()) {
         param->addListener(this);
     }
+}
+
+Jx11AudioProcessor::~Jx11AudioProcessor()
+{
+    for (auto& param : getParameters()) {
+        param->removeListener(this);
+    }
+#if PERFETTO
+    MelatoninPerfetto::get().endSession();
+#endif
 }
 
 //==============================================================================
@@ -34,6 +47,7 @@ void Jx11AudioProcessor::reset()
 void Jx11AudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
                                       [[maybe_unused]] juce::MidiBuffer& midiMessages)
 {
+    TRACE_DSP();
     juce::ScopedNoDenormals noDenormals;
     const auto totalNumInputChannels = getTotalNumInputChannels();
     const auto totalNumOutputChannels = getTotalNumOutputChannels();
@@ -60,6 +74,7 @@ void Jx11AudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
 void Jx11AudioProcessor::splitBufferByEvents(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+    TRACE_DSP();
     int bufferOffset = 0;
 
     // Loop through the MIDI messages, which are sorted by samplePosition,
@@ -102,6 +117,7 @@ void Jx11AudioProcessor::parameterValueChanged([[maybe_unused]] int parameterInd
 
 void Jx11AudioProcessor::handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2)
 {
+    TRACE_DSP();
     // Print out the MIDI message:
     // char s[16];
     // snprintf(s, 16, "%02hhX %02hhX %02hhX", data0, data1, data2);
@@ -129,6 +145,7 @@ void Jx11AudioProcessor::handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2)
 
 void Jx11AudioProcessor::render(juce::AudioBuffer<float>& buffer, int sampleCount, int bufferOffset)
 {
+    TRACE_DSP();
     float* outputBuffers[2] = {nullptr, nullptr};
     outputBuffers[0] = buffer.getWritePointer(0) + bufferOffset;
     if (getTotalNumOutputChannels() > 1) {
@@ -140,6 +157,7 @@ void Jx11AudioProcessor::render(juce::AudioBuffer<float>& buffer, int sampleCoun
 
 void Jx11AudioProcessor::update()
 {
+    TRACE_DSP();
     // This function is called from the audio callback whenever any of the
     // parameters have changed. Here, we simply recalculate everything when
     // this happens. This function is called at most once per audio block.

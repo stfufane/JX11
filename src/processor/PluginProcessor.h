@@ -4,6 +4,7 @@
 #include "Params.h"
 #include "engine/Synth.h"
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <melatonin_perfetto/melatonin_perfetto.h>
 
 namespace JX11::Processor
 {
@@ -13,6 +14,7 @@ class Jx11AudioProcessor final : public BaseProcessor, public juce::AudioProcess
 {
 public:
     Jx11AudioProcessor();
+    ~Jx11AudioProcessor() final;
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) final;
     void releaseResources() final;
@@ -35,6 +37,11 @@ private:
     Params mParams;
 
     Engine::Synth mSynth;
+
+    //==============================================================================
+#if PERFETTO
+    std::unique_ptr<perfetto::TracingSession> tracingSession;
+#endif
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Jx11AudioProcessor)
