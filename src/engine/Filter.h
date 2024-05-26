@@ -2,6 +2,9 @@
 
 #include <cmath>
 
+namespace JX11::Engine
+{
+
 // Resonant low-pass filter based on Cytomic SVF.
 class Filter
 {
@@ -42,6 +45,8 @@ public:
 private:
     const float PI = 3.1415926535897932f;
 
-    float g, k, a1, a2, a3;  // filter coefficients
-    float ic1eq, ic2eq;      // internal state
+    float g, k, a1, a2, a3; // filter coefficients
+    float ic1eq, ic2eq;     // internal state
 };
+
+} // namespace JX11::Engine

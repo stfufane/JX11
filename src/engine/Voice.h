@@ -1,17 +1,23 @@
 #pragma once
 
-#include <algorithm>
-#include "Oscillator.h"
 #include "Envelope.h"
 #include "Filter.h"
+#include "Oscillator.h"
+#include <algorithm>
+#include <juce_core/juce_core.h>
+#include <optional>
+
+namespace JX11::Engine
+{
 
 // State for an active voice.
 struct Voice
 {
-    // The MIDI note number that this voice is playing, or the special value
-    // SUSTAIN when the key has been released but the sustain pedal is held
-    // down. Is 0 if the voice is inactive.
-    size_t note;
+    // The MIDI note number that this voice is playing.
+    std::optional<size_t> note = std::nullopt;
+
+    // Whether the sustain pedal is held down for this voice.
+    bool sustained = false;
 
     // The current period of the waveform in samples, which may be gliding up
     // to the value from `target`.
@@ -53,7 +59,8 @@ struct Voice
 
     void reset()
     {
-        note = 0;
+        note = std::nullopt;
+        sustained = false;
         saw = 0.0f;
 
         osc1.reset();
@@ -101,9 +108,10 @@ struct Voice
 
     void updatePanning()
     {
+        jassert(note.has_value());
         // Put middle C (note 60) in the center of the stereo field.
         // Fully panned left is note (60 - 24), fully right is note (60 + 24).
-        float panning = std::clamp((static_cast<float>(note) - 60.0f) / 24.0f, -1.0f, 1.0f);
+        float panning = std::clamp((static_cast<float>(*note) - 60.0f) / 24.0f, -1.0f, 1.0f);
 
         // Use constant power panning formula.
         panLeft = std::sin(PI_OVER_4 * (1.0f - panning));
@@ -139,3 +147,5 @@ struct Voice
         filterEnv.release();
     }
 };
+
+} // namespace JX11::Engine

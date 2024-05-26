@@ -1,7 +1,8 @@
 #include "BaseProcessor.h"
 #include "Params.h"
 
-namespace JX11::Processor {
+namespace JX11::Processor
+{
 
 //==============================================================================
 BaseProcessor::BaseProcessor()
@@ -13,13 +14,15 @@ BaseProcessor::BaseProcessor()
 #endif
               .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-      ) {
+      )
+{
 }
 
 //==============================================================================
 const juce::String BaseProcessor::getName() const { return JucePlugin_Name; }
 
-bool BaseProcessor::acceptsMidi() const {
+bool BaseProcessor::acceptsMidi() const
+{
 #if JucePlugin_WantsMidiInput
     return true;
 #else
@@ -27,7 +30,8 @@ bool BaseProcessor::acceptsMidi() const {
 #endif
 }
 
-bool BaseProcessor::producesMidi() const {
+bool BaseProcessor::producesMidi() const
+{
 #if JucePlugin_ProducesMidiOutput
     return true;
 #else
@@ -35,7 +39,8 @@ bool BaseProcessor::producesMidi() const {
 #endif
 }
 
-bool BaseProcessor::isMidiEffect() const {
+bool BaseProcessor::isMidiEffect() const
+{
 #if JucePlugin_IsMidiEffect
     return true;
 #else
@@ -45,7 +50,8 @@ bool BaseProcessor::isMidiEffect() const {
 
 double BaseProcessor::getTailLengthSeconds() const { return 0.0; }
 
-int BaseProcessor::getNumPrograms() {
+int BaseProcessor::getNumPrograms()
+{
     return 1; // NB: some hosts don't cope very well if you tell them there are
               // 0 programs, so this should be at least 1, even if you're not
               // really implementing programs.
@@ -55,17 +61,20 @@ int BaseProcessor::getCurrentProgram() { return 0; }
 
 void BaseProcessor::setCurrentProgram(int index) { juce::ignoreUnused(index); }
 
-const juce::String BaseProcessor::getProgramName(int index) {
+const juce::String BaseProcessor::getProgramName(int index)
+{
     juce::ignoreUnused(index);
     return {};
 }
 
-void BaseProcessor::changeProgramName(int index, const juce::String& newName) {
+void BaseProcessor::changeProgramName(int index, const juce::String& newName)
+{
     juce::ignoreUnused(index, newName);
 }
 
 //==============================================================================
-bool BaseProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const {
+bool BaseProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+{
 #if JucePlugin_IsMidiEffect
     juce::ignoreUnused(layouts);
     return true;
@@ -89,16 +98,19 @@ bool BaseProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const {
 }
 
 //==============================================================================
-bool BaseProcessor::hasEditor() const {
+bool BaseProcessor::hasEditor() const
+{
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* BaseProcessor::createEditor() {
+juce::AudioProcessorEditor* BaseProcessor::createEditor()
+{
     return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
-void BaseProcessor::getStateInformation(juce::MemoryBlock& destData) {
+void BaseProcessor::getStateInformation(juce::MemoryBlock& destData)
+{
     juce::XmlElement xml("PluginState");
     for (const auto& param : getParameters()) {
         xml.setAttribute(getParamID(param), param->getValue());
@@ -106,7 +118,8 @@ void BaseProcessor::getStateInformation(juce::MemoryBlock& destData) {
     copyXmlToBinary(xml, destData);
 }
 
-void BaseProcessor::setStateInformation(const void* data, int sizeInBytes) {
+void BaseProcessor::setStateInformation(const void* data, int sizeInBytes)
+{
     auto xml = getXmlFromBinary(data, sizeInBytes);
     if (!xml) {
         return;

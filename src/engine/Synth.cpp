@@ -1,17 +1,17 @@
 #include "Synth.h"
 
+namespace JX11::Engine
+{
+
 static const float ANALOG = 0.002f; // oscillator drift
 
-// Special "note number" that says this voice is now kept alive by the sustain
-// pedal being pressed down. As soon as the pedal is released, this voice will
-// fade out.
-static const size_t SUSTAIN = -1;
-
-Synth::Synth() {
+Synth::Synth()
+{
     sampleRate = 44100.0f;
 }
 
-void Synth::allocateResources(double sampleRate_, int /*samplesPerBlock*/) {
+void Synth::allocateResources(double sampleRate_, int /*samplesPerBlock*/)
+{
     sampleRate = static_cast<float>(sampleRate_);
 
     for (auto& voice : voices) {
@@ -19,11 +19,13 @@ void Synth::allocateResources(double sampleRate_, int /*samplesPerBlock*/) {
     }
 }
 
-void Synth::deallocateResources() {
+void Synth::deallocateResources()
+{
     // do nothing
 }
 
-void Synth::reset() {
+void Synth::reset()
+{
     // Turn off all playing voices.
     for (auto& voice : voices) {
         voice.reset();
@@ -48,7 +50,8 @@ void Synth::reset() {
     outputLevelSmoother.reset(sampleRate, 0.05);
 }
 
-void Synth::render(float** outputBuffers, int sampleCount) {
+void Synth::render(float** outputBuffers, int sampleCount)
+{
     float* outputBufferLeft = outputBuffers[0];
     float* outputBufferRight = outputBuffers[1];
 
@@ -113,7 +116,8 @@ void Synth::render(float** outputBuffers, int sampleCount) {
     // protectYourEars(outputBufferRight, sampleCount);
 }
 
-void Synth::updateLFO() {
+void Synth::updateLFO()
+{
     if (--lfoStep <= 0) {
         lfoStep = LFO_MAX; // reset the counter
 
@@ -155,7 +159,8 @@ void Synth::updateLFO() {
     }
 }
 
-void Synth::midiMessage(uint8_t data0, uint8_t data1, uint8_t data2) {
+void Synth::midiMessage(uint8_t data0, uint8_t data1, uint8_t data2)
+{
     switch (data0 & 0xF0) { // status byte (all channels)
     // Note off
     case 0x80:
@@ -194,7 +199,8 @@ void Synth::midiMessage(uint8_t data0, uint8_t data1, uint8_t data2) {
     }
 }
 
-void Synth::controlChange(uint8_t data1, uint8_t data2) {
+void Synth::controlChange(uint8_t data1, uint8_t data2)
+{
     switch (data1) {
     // Mod wheel
     case 0x01:
@@ -209,7 +215,7 @@ void Synth::controlChange(uint8_t data1, uint8_t data2) {
         // note-off event with note = -1, meaning all sustained notes
         // will be moved into their envelope release stage.
         if (!sustainPedalPressed) {
-            noteOff(SUSTAIN);
+            stopSustainedNotes();
         }
         break;
 
@@ -243,7 +249,8 @@ void Synth::controlChange(uint8_t data1, uint8_t data2) {
     }
 }
 
-void Synth::noteOn(size_t note, int velocity) {
+void Synth::noteOn(size_t note, int velocity)
+{
     if (ignoreVelocity) {
         velocity = 80;
     }
@@ -263,7 +270,8 @@ void Synth::noteOn(size_t note, int velocity) {
     startVoice(v, note, velocity);
 }
 
-void Synth::noteOff(size_t note) {
+void Synth::noteOff(size_t note)
+{
     // In monophonic mode and the currently playing note is released?
     if ((numVoices == 1) && (voices.front().note == note)) {
         // Did we find an older note whose key is still held down?
@@ -283,17 +291,30 @@ void Synth::noteOff(size_t note) {
         if (voice.note == note) {
             if (sustainPedalPressed) {
                 // Sustain pedal is pressed, so put the note in sustain mode.
-                voice.note = SUSTAIN;
+                voice.sustained = true;
             } else {
                 // Sustain pedal is not pressed, so start envelope release.
                 voice.release();
-                voice.note = 0;
+                voice.note = std::nullopt;
+                voice.sustained = false;
             }
         }
     }
 }
 
-void Synth::startVoice(size_t v, size_t note, int velocity) {
+void Synth::stopSustainedNotes()
+{
+    for (auto& voice : voices) {
+        if (voice.sustained) {
+            voice.release();
+            voice.note = std::nullopt;
+            voice.sustained = false;
+        }
+    }
+}
+
+void Synth::startVoice(size_t v, size_t note, int velocity)
+{
     float period = calcPeriod(v, note);
 
     // Set the period as the target that we'll glide to (if glide enabled).
@@ -368,7 +389,8 @@ void Synth::startVoice(size_t v, size_t note, int velocity) {
     filterEnv.attack();
 }
 
-void Synth::restartMonoVoice(size_t note, int velocity) {
+void Synth::restartMonoVoice(size_t note, int velocity)
+{
     // This is a simplified version of startVoice, used only in mono mode when
     // playing legato-style or when activating a queued note after a key up.
 
@@ -397,7 +419,8 @@ void Synth::restartMonoVoice(size_t note, int velocity) {
     voice.updatePanning();
 }
 
-float Synth::calcPeriod(size_t v, size_t note) const {
+float Synth::calcPeriod(size_t v, size_t note) const
+{
     // Calculate the period in samples. This formula may look complicated but
     // is explained in detail in the book.
     // The ANALOG term adds a small amount of detuning based on the current
@@ -413,7 +436,8 @@ float Synth::calcPeriod(size_t v, size_t note) const {
     return period;
 }
 
-size_t Synth::findFreeVoice() const {
+size_t Synth::findFreeVoice() const
+{
     size_t v = 0;
     float l = 100.0f; // louder than any envelope!
 
@@ -429,7 +453,8 @@ size_t Synth::findFreeVoice() const {
     return v;
 }
 
-void Synth::shiftQueuedNotes() {
+void Synth::shiftQueuedNotes()
+{
     // Queue any held notes. This puts the previous note numbers into the other
     // Voice objects, but it won't actually play these voices. Used during the
     // next Note Off event to determine which note to restore.
@@ -443,14 +468,15 @@ void Synth::shiftQueuedNotes() {
     }
 }
 
-std::optional<size_t> Synth::nextQueuedNote() {
+std::optional<size_t> Synth::nextQueuedNote()
+{
     // Are there any older notes queued? Note that some of these may have
     // been released in the mean time, in which case `voice.note` was set
     // to 0 or SUSTAIN (in the loop from the else clause below). This means
     // notes kept alive only by the sustain pedal are not restored.
     size_t held = 0;
     for (size_t v = MAX_VOICES - 1; v > 0; v--) {
-        if (voices[v].note > 0) {
+        if (voices[v].note.has_value() && !voices[v].sustained) {
             held = v;
         }
     }
@@ -458,7 +484,7 @@ std::optional<size_t> Synth::nextQueuedNote() {
     // Remove this older note from the queue.
     if (held > 0) {
         auto note = voices[held].note;
-        voices[held].note = 0;
+        voices[held].note = std::nullopt;
         return note;
     }
 
@@ -466,8 +492,11 @@ std::optional<size_t> Synth::nextQueuedNote() {
     return std::nullopt;
 }
 
-bool Synth::isPlayingLegatoStyle() const {
+bool Synth::isPlayingLegatoStyle() const
+{
     return std::any_of(voices.begin(), voices.end(), [](const auto& voice) {
-        return voice.note > 0;
+        return voice.note.has_value() && !voice.sustained;
     });
 }
+
+} // namespace JX11::Engine

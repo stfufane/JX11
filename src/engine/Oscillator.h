@@ -2,6 +2,9 @@
 
 #include <cmath>
 
+namespace JX11::Engine
+{
+
 const float PI_OVER_4 = 0.7853981633974483f;
 const float PI = 3.1415926535897932f;
 const float TWO_PI = 6.2831853071795864f;
@@ -34,7 +37,7 @@ public:
     {
         float output = 0.0f;
 
-        phase += inc;  // increment position in time
+        phase += inc; // increment position in time
 
         if (phase <= PI_OVER_4) {
             // This is executed the very first time and after every cycle.
@@ -74,7 +77,7 @@ public:
             dsin = 2.0f * std::cos(inc);
 
             // Output the peak of the sinc pulse. Make sure to not divide by 0.
-            if (phase*phase > 1e-9) {
+            if (phase * phase > 1e-9) {
                 output = sin0 / phase;
             } else {
                 output = amplitude;
@@ -147,3 +150,5 @@ private:
     // DC offset. This is subtracted to create the sawtooth wave.
     float dc;
 };
+
+} // namespace JX11::Engine

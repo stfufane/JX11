@@ -1,11 +1,14 @@
 #pragma once
 
+#include "NoiseGenerator.h"
+#include "Voice.h"
 #include <array>
 #include <cstdint>
-#include <optional>
 #include <juce_audio_basics/juce_audio_basics.h>
-#include "Voice.h"
-#include "NoiseGenerator.h"
+#include <optional>
+
+namespace JX11::Engine
+{
 
 // The main class for the synthesizer.
 class Synth
@@ -113,6 +116,8 @@ private:
     void startVoice(size_t v, size_t note, int velocity);
     void restartMonoVoice(size_t note, int velocity);
 
+    void stopSustainedNotes();
+
     // Calculate the oscillator period based on the MIDI note number.
     float calcPeriod(size_t v, size_t note) const;
 
@@ -176,3 +181,5 @@ private:
     // MIDI CC amount used to modulate the cutoff frequency.
     float filterCtl;
 };
+
+} // namespace JX11::Engine

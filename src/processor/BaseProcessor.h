@@ -2,10 +2,12 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
-namespace JX11::Processor {
+namespace JX11::Processor
+{
 
 //==============================================================================
-class BaseProcessor : public juce::AudioProcessor {
+class BaseProcessor : public juce::AudioProcessor
+{
 public:
     //==============================================================================
     BaseProcessor();
@@ -38,7 +40,7 @@ public:
     void setStateInformation(const void* data, int sizeInBytes) override;
 
 protected:
-    std::atomic<bool> parametersChanged { false };
+    std::atomic<bool> parametersChanged {false};
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BaseProcessor)

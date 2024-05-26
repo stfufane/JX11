@@ -1,5 +1,8 @@
 #pragma once
 
+namespace JX11::Engine
+{
+
 // Very simple white noise generator.
 class NoiseGenerator
 {
@@ -24,3 +27,5 @@ public:
 private:
     unsigned int noiseSeed;
 };
+
+} // namespace JX11::Engine

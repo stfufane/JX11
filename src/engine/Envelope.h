@@ -1,6 +1,9 @@
 #pragma once
 
-const float SILENCE = 0.0001f;  // voice choking
+namespace JX11::Engine
+{
+
+const float SILENCE = 0.0001f; // voice choking
 
 // Analog style envelope generator.
 class Envelope
@@ -72,3 +75,5 @@ private:
     float target;
     float multiplier;
 };
+
+} // namespace JX11::Engine

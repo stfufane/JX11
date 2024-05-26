@@ -1,7 +1,8 @@
 #include "PluginProcessor.h"
 #include "Utils.h"
 
-namespace JX11::Processor {
+namespace JX11::Processor
+{
 
 Jx11AudioProcessor::Jx11AudioProcessor()
     : mParams(*this)
@@ -160,8 +161,7 @@ void Jx11AudioProcessor::update()
     float envRelease = mParams.envReleaseParam->get();
     if (envRelease < 1.0f) {
         mSynth.envRelease = 0.75f; // extra fast release
-    }
-    else {
+    } else {
         mSynth.envRelease = std::exp(-inverseSampleRate * std::exp(5.5f - 0.075f * envRelease));
     }
 
@@ -190,7 +190,7 @@ void Jx11AudioProcessor::update()
     mSynth.tune = sampleRate * std::exp(0.05776226505f * tuneInSemi);
 
     // Mono or poly?
-    mSynth.numVoices = (mParams.polyModeParam->getIndex() == 0) ? 1 : Synth::MAX_VOICES;
+    mSynth.numVoices = (mParams.polyModeParam->getIndex() == 0) ? 1 : Engine::Synth::MAX_VOICES;
 
     // Convert decibels to gain. Use a smoother for this parameter.
     mSynth.outputLevelSmoother.setTargetValue(juce::Decibels::decibelsToGain(mParams.outputLevelParam->get()));
@@ -201,8 +201,7 @@ void Jx11AudioProcessor::update()
     if (filterVelocity < -90.0f) {
         mSynth.velocitySensitivity = 0.0f; // turn off velocity
         mSynth.ignoreVelocity = true;
-    }
-    else {
+    } else {
         mSynth.velocitySensitivity = 0.0005f * filterVelocity;
         mSynth.ignoreVelocity = false;
     }
@@ -215,7 +214,7 @@ void Jx11AudioProcessor::update()
     // value to 0.018 Hz - 20.09 Hz. Use this to calculate the phase increment
     // for a sine wave running at 1/32th the sample rate.
     float lfoRate = std::exp(7.0f * mParams.lfoRateParam->get() - 4.0f);
-    mSynth.lfoInc = lfoRate * inverseUpdateRate * float(TWO_PI);
+    mSynth.lfoInc = lfoRate * inverseUpdateRate * float(Engine::TWO_PI);
 
     // The vibrato parameter is a parabolic curve going from 0.0 for 0% up to
     // 0.05 for 100%. You can choose between PWM mode (to the left) and vibrato
@@ -237,8 +236,7 @@ void Jx11AudioProcessor::update()
     float glideRate = mParams.glideRateParam->get();
     if (glideRate < 2.0f) {
         mSynth.glideRate = 1.0f; // no glide
-    }
-    else {
+    } else {
         mSynth.glideRate = 1.0f - std::exp(-inverseUpdateRate * std::exp(6.0f - 0.07f * glideRate));
     }
 

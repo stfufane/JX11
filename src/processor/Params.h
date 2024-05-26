@@ -3,9 +3,11 @@
 #include "juce_core/system/juce_PlatformDefs.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 
-namespace JX11::Processor {
+namespace JX11::Processor
+{
 
-namespace ParamIds {
+namespace ParamIds
+{
 #define PARAMETER_ID(str) const juce::ParameterID str(#str, 1);
 
 PARAMETER_ID(oscMix)
@@ -42,9 +44,11 @@ PARAMETER_ID(outputLevel)
 #undef PARAMETER_ID
 } // namespace ParamIds
 
-struct Params {
+struct Params
+{
     Params() = delete;
-    explicit Params(juce::AudioProcessor& processor) {
+    explicit Params(juce::AudioProcessor& processor)
+    {
 
         auto oscMixStringFromValue = [](float value, int) -> juce::String {
             char s[16] = {0};
@@ -291,7 +295,8 @@ struct Params {
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Params)
 };
 
-inline juce::String getParamID(juce::AudioProcessorParameter* param) {
+inline juce::String getParamID(juce::AudioProcessorParameter* param)
+{
     if (auto paramWithID =
             dynamic_cast<juce::AudioProcessorParameterWithID*>(param))
         return paramWithID->paramID;

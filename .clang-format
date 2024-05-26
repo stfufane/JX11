@@ -2,8 +2,14 @@
 BasedOnStyle: LLVM
 AccessModifierOffset: -4
 IndentWidth: 4
-ObjCBlockIndentWidth: 4
 PointerAlignment: Left
 SpaceBeforeCpp11BracedList: true
 ColumnLimit: 0
-BreakBeforeBraces: Stroustrup
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterNamespace: true
+    AfterFunction: true
+    AfterClass: true
+    AfterStruct: true
+    BeforeElse: false
+    BeforeWhile: false
