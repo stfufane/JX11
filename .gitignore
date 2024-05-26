@@ -1,0 +1,13 @@
+.cache/
+.idea/
+.vscode/
+.vs/
+.DS_Store
+
+libs/
+build/
+out/
+gen/
+
+cmake-build-debug/
+cmake-build-release/
