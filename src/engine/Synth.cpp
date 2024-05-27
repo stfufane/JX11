@@ -1,9 +1,15 @@
 #include "Synth.h"
+#include <limits>
 
 namespace JX11::Engine
 {
 
 static const float ANALOG = 0.002f; // oscillator drift
+
+// Special "note number" that says this voice is now kept alive by the sustain
+// pedal being pressed down. As soon as the pedal is released, this voice will
+// fade out.
+static const size_t SUSTAIN = std::numeric_limits<size_t>::max();
 
 void Synth::allocateResources(double sampleRate_, int /*samplesPerBlock*/)
 {
@@ -106,9 +112,6 @@ void Synth::render(float** outputBuffers, int sampleCount)
             voice.filter.reset();
         }
     }
-
-    // protectYourEars(outputBufferLeft, sampleCount);
-    // protectYourEars(outputBufferRight, sampleCount);
 }
 
 void Synth::updateLFO()
@@ -210,7 +213,7 @@ void Synth::controlChange(uint8_t data1, uint8_t data2)
         // note-off event with note = -1, meaning all sustained notes
         // will be moved into their envelope release stage.
         if (!sustainPedalPressed) {
-            stopSustainedNotes();
+            noteOff(SUSTAIN);
         }
         break;
 
@@ -252,8 +255,9 @@ void Synth::noteOn(size_t note, int velocity)
 
     size_t v = 0; // index of the voice to use (0 = mono voice)
 
-    if (numVoices == 1) {              // monophonic
-        if (voices.front().note > 0) { // legato-style playing
+    if (numVoices == 1) { // monophonic
+        auto& voice = voices.front();
+        if (voice.note.has_value() && voice.note != SUSTAIN) { // legato-style playing
             shiftQueuedNotes();
             restartMonoVoice(note, velocity);
             return;
@@ -268,7 +272,7 @@ void Synth::noteOn(size_t note, int velocity)
 void Synth::noteOff(size_t note)
 {
     // In monophonic mode and the currently playing note is released?
-    if ((numVoices == 1) && (voices.front().note == note)) {
+    if ((numVoices == 1) && (voices[0].note == note)) {
         // Did we find an older note whose key is still held down?
         if (auto queuedNote = nextQueuedNote(); queuedNote) {
             // Put this note into voice 0 and restart it.
@@ -278,29 +282,20 @@ void Synth::noteOff(size_t note)
 
     // We get here in polyphonic mode, or when a key was released that is
     // not currently playing in monophonic mode.
+    // We also get here when the sustain pedal is released. In that case,
+    // the note number is SUSTAIN.
+
     for (auto& voice : voices) {
         // Any voices playing this note?
         if (voice.note == note) {
             if (sustainPedalPressed) {
                 // Sustain pedal is pressed, so put the note in sustain mode.
-                voice.sustained = true;
+                voice.note = SUSTAIN;
             } else {
                 // Sustain pedal is not pressed, so start envelope release.
                 voice.release();
                 voice.note = std::nullopt;
-                voice.sustained = false;
             }
-        }
-    }
-}
-
-void Synth::stopSustainedNotes()
-{
-    for (auto& voice : voices) {
-        if (voice.sustained) {
-            voice.release();
-            voice.note = std::nullopt;
-            voice.sustained = false;
         }
     }
 }
@@ -317,9 +312,9 @@ void Synth::startVoice(size_t v, size_t note, int velocity)
     // pitch to the new one. Note that legato-style playing in monophonic mode
     // is handled elsewhere.
     size_t noteDistance = 0;
-    if (lastNote > 0) {
+    if (lastNote.has_value()) {
         if ((glideMode == 2) || ((glideMode == 1) && isPlayingLegatoStyle())) {
-            noteDistance = note - lastNote;
+            noteDistance = note - *lastNote;
         }
     }
 
@@ -462,10 +457,14 @@ void Synth::shiftQueuedNotes()
 
 std::optional<size_t> Synth::nextQueuedNote()
 {
-    // Are there any older notes queued?
+    // Are there any older notes queued? Note that some of these may have
+    // been released in the mean time, in which case `voice.note` was set
+    // to 0 or SUSTAIN (in the loop from the else clause below). This means
+    // notes kept alive only by the sustain pedal are not restored.
     size_t held = 0;
     for (size_t v = MAX_VOICES - 1; v > 0; v--) {
-        if (voices[v].note.has_value() && !voices[v].sustained) {
+        auto& note = voices[v].note;
+        if (note.has_value() && note != SUSTAIN) {
             held = v;
         }
     }
@@ -483,8 +482,11 @@ std::optional<size_t> Synth::nextQueuedNote()
 
 bool Synth::isPlayingLegatoStyle() const
 {
-    return std::any_of(voices.begin(), voices.end(), [](const auto& voice) {
-        return voice.note.has_value();
+    // Count how many playing voices are for keys that are still held down,
+    // i.e. that did not get a Note Off event yet. If note is 0, this voice
+    // is not playing; if it's SUSTAIN, the note is sustained by the pedal.
+    return std::any_of(voices.begin(), voices.end(), [](const Voice& voice) {
+        return voice.note.has_value() && voice.note != SUSTAIN;
     });
 }
 

@@ -4,7 +4,7 @@
 namespace JX11::Processor
 {
 
-Jx11AudioProcessor::Jx11AudioProcessor()
+JX11AudioProcessor::JX11AudioProcessor()
     : mParams(*this)
 {
 #if PERFETTO
@@ -15,7 +15,7 @@ Jx11AudioProcessor::Jx11AudioProcessor()
     }
 }
 
-Jx11AudioProcessor::~Jx11AudioProcessor()
+JX11AudioProcessor::~JX11AudioProcessor()
 {
     for (auto& param : getParameters()) {
         param->removeListener(this);
@@ -26,25 +26,25 @@ Jx11AudioProcessor::~Jx11AudioProcessor()
 }
 
 //==============================================================================
-void Jx11AudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+void JX11AudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     mSynth.allocateResources(sampleRate, samplesPerBlock);
     parametersChanged.store(true);
     reset();
 }
 
-void Jx11AudioProcessor::releaseResources()
+void JX11AudioProcessor::releaseResources()
 {
     mSynth.deallocateResources();
 }
 
-void Jx11AudioProcessor::reset()
+void JX11AudioProcessor::reset()
 {
     mSynth.reset();
     mSynth.outputLevelSmoother.setCurrentAndTargetValue(juce::Decibels::decibelsToGain(mParams.outputLevelParam->get()));
 }
 
-void Jx11AudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
+void JX11AudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
                                       [[maybe_unused]] juce::MidiBuffer& midiMessages)
 {
     TRACE_DSP();
@@ -72,7 +72,7 @@ void Jx11AudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 #endif
 }
 
-void Jx11AudioProcessor::splitBufferByEvents(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void JX11AudioProcessor::splitBufferByEvents(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     TRACE_DSP();
     int bufferOffset = 0;
@@ -106,7 +106,7 @@ void Jx11AudioProcessor::splitBufferByEvents(juce::AudioBuffer<float>& buffer, j
     midiMessages.clear();
 }
 
-void Jx11AudioProcessor::parameterValueChanged([[maybe_unused]] int parameterIndex, [[maybe_unused]] float newValue)
+void JX11AudioProcessor::parameterValueChanged([[maybe_unused]] int parameterIndex, [[maybe_unused]] float newValue)
 {
     // This function is called when a parameter changes. We set a flag to
     // recalculate the synth parameters in the audio thread. This is done to
@@ -115,7 +115,7 @@ void Jx11AudioProcessor::parameterValueChanged([[maybe_unused]] int parameterInd
     parametersChanged.store(true);
 }
 
-void Jx11AudioProcessor::handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2)
+void JX11AudioProcessor::handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2)
 {
     TRACE_DSP();
     // Print out the MIDI message:
@@ -143,7 +143,7 @@ void Jx11AudioProcessor::handleMIDI(uint8_t data0, uint8_t data1, uint8_t data2)
     mSynth.midiMessage(data0, data1, data2);
 }
 
-void Jx11AudioProcessor::render(juce::AudioBuffer<float>& buffer, int sampleCount, int bufferOffset)
+void JX11AudioProcessor::render(juce::AudioBuffer<float>& buffer, int sampleCount, int bufferOffset)
 {
     TRACE_DSP();
     float* outputBuffers[2] = {nullptr, nullptr};
@@ -155,7 +155,7 @@ void Jx11AudioProcessor::render(juce::AudioBuffer<float>& buffer, int sampleCoun
     mSynth.render(outputBuffers, sampleCount);
 }
 
-void Jx11AudioProcessor::update()
+void JX11AudioProcessor::update()
 {
     TRACE_DSP();
     // This function is called from the audio callback whenever any of the
@@ -302,5 +302,5 @@ void Jx11AudioProcessor::update()
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new JX11::Processor::Jx11AudioProcessor();
+    return new JX11::Processor::JX11AudioProcessor();
 }

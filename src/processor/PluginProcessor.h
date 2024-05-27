@@ -10,11 +10,11 @@ namespace JX11::Processor
 {
 
 //==============================================================================
-class Jx11AudioProcessor final : public BaseProcessor, public juce::AudioProcessorParameter::Listener
+class JX11AudioProcessor final : public BaseProcessor, public juce::AudioProcessorParameter::Listener
 {
 public:
-    Jx11AudioProcessor();
-    ~Jx11AudioProcessor() final;
+    JX11AudioProcessor();
+    ~JX11AudioProcessor() final;
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) final;
     void releaseResources() final;
@@ -25,6 +25,8 @@ public:
 
     void parameterValueChanged(int parameterIndex, float newValue) final;
     void parameterGestureChanged(int, bool) final {}
+
+    juce::AudioProcessorEditor* createEditor() final;
 
 private:
     void update();
@@ -44,7 +46,7 @@ private:
 #endif
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Jx11AudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(JX11AudioProcessor)
 };
 
 } // namespace JX11::Processor

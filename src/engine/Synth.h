@@ -2,10 +2,7 @@
 
 #include "NoiseGenerator.h"
 #include "Voice.h"
-#include <array>
-#include <cstdint>
 #include <juce_audio_basics/juce_audio_basics.h>
-#include <optional>
 
 namespace JX11::Engine
 {
@@ -116,8 +113,6 @@ private:
     void startVoice(size_t v, size_t note, int velocity);
     void restartMonoVoice(size_t note, int velocity);
 
-    void stopSustainedNotes();
-
     // Calculate the oscillator period based on the MIDI note number.
     float calcPeriod(size_t v, size_t note) const;
 
@@ -138,7 +133,7 @@ private:
     bool isPlayingLegatoStyle() const;
 
     // The current sample rate.
-    float sampleRate = 44100.0f;
+    float sampleRate = 44100.f;
 
     // List of the active voices.
     std::array<Voice, MAX_VOICES> voices;
@@ -147,7 +142,7 @@ private:
     NoiseGenerator noiseGen;
 
     // Most recent note that was played. Used for gliding.
-    size_t lastNote;
+    std::optional<size_t> lastNote;
 
     // === Modulation ===
 

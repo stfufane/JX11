@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.27)
 
-project(Jx11
+project(JX11
     VERSION 0.0.1
     DESCRIPTION "A JUCE synthesizer"
     LANGUAGES CXX C
@@ -71,6 +71,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/processor/PluginProcessor.h
     src/processor/Params.h
     src/processor/Utils.h
+
     src/engine/Envelope.h
     src/engine/Filter.h
     src/engine/NoiseGenerator.h
@@ -85,7 +86,7 @@ set(BinaryDataTarget "${PROJECT_NAME}-Data")
 juce_add_binary_data(${BinaryDataTarget} SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/data/img/logo.png
 )
-target_link_libraries(${PROJECT_NAME} PRIVATE ${DataTarget})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${BinaryDataTarget})
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
