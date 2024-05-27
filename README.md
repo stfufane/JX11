@@ -1,6 +1,8 @@
 # JX11
 
-A JUCE synthesizer
+Example synth from [this book](https://leanpub.com/synth-plugin) by [Matthijs Hollemans](https://audiodev.blog/).
+
+I replaced the Projucer project with a CMake project, rearranged some of the code, and am working on a GUI.
 
 ## Build instructions
 
