@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "Utils.h"
+#include "gui/PluginEditor.h"
 
 namespace JX11::Processor
 {
@@ -23,6 +24,11 @@ JX11AudioProcessor::~JX11AudioProcessor()
 #if PERFETTO
     MelatoninPerfetto::get().endSession();
 #endif
+}
+
+juce::AudioProcessorEditor* JX11AudioProcessor::createEditor()
+{
+    return new Gui::JX11AudioProcessorEditor(*this);
 }
 
 //==============================================================================

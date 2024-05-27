@@ -58,7 +58,7 @@ struct Params
 
         oscMixParam = new juce::AudioParameterFloat(
             ParamIds::oscMix, "Osc Mix",
-            juce::NormalisableRange<float>(0.0f, 100.0f), 0.0f,
+            juce::NormalisableRange<float>(0.0f, 100.0f), 50.0f,
             juce::AudioParameterFloatAttributes()
                 .withLabel("%")
                 .withStringFromValueFunction(oscMixStringFromValue));

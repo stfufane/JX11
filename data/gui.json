@@ -1,0 +1,53 @@
+{
+    "mainPanel": {
+        "Oscillator Panel": {
+            "type": "relative",
+            "coords": {
+                "x": 5,
+                "y": 5,
+                "w": 20,
+                "h": 30
+            }
+        },
+        "Filter Panel": {
+            "type": "relative",
+            "coords": {
+                "x": 35,
+                "y": 5,
+                "w": 20,
+                "h": 30
+            }
+        }
+    },
+    "Oscillator Panel": {
+        "Osc Mix": {
+            "type": "relative",
+            "coords": {
+                "x": 0,
+                "y": 0,
+                "w": 100,
+                "h": 50
+            }
+        },
+        "Osc Tune": {
+            "type": "relative",
+            "coords": {
+                "x": 0,
+                "y": 50,
+                "w": 100,
+                "h": 50
+            }
+        }
+    },
+    "Filter Panel": {
+        "Filter Freq": {
+            "type": "relative",
+            "coords": {
+                "x": 0,
+                "y": 0,
+                "w": 100,
+                "h": 50
+            }
+        }
+    }
+}

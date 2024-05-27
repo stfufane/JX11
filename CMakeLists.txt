@@ -32,6 +32,20 @@ CPMAddPackage(
     SOURCE_DIR ${LIB_DIR}/melatonin_perfetto
 )
 
+CPMAddPackage(
+    NAME melatonin_inspector
+    GIT_TAG main
+    GITHUB_REPOSITORY sudara/melatonin_inspector
+    SOURCE_DIR ${LIB_DIR}/melatonin_inspector
+)
+
+CPMAddPackage(
+    NAME json
+    GIT_TAG v3.11.3
+    GITHUB_REPOSITORY nlohmann/json
+    SOURCE_DIR ${LIB_DIR}/json
+)
+
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
 if(MSVC)
@@ -62,7 +76,7 @@ juce_add_plugin("${PROJECT_NAME}"
 
 target_compile_features(${PROJECT_NAME}
     PUBLIC
-    cxx_std_17)
+    cxx_std_20)
 
 target_sources(${PROJECT_NAME} PRIVATE
     src/processor/BaseProcessor.cpp
@@ -78,13 +92,39 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/engine/Oscillator.h
     src/engine/Synth.h
     src/engine/Synth.cpp
-    src/engine/Voice.h)
+    src/engine/Voice.h
+
+    src/gui/PluginEditor.h
+    src/gui/PluginEditor.cpp
+    src/gui/AttachedComponent.hpp
+    src/gui/IPanel.h
+    src/gui/IPanel.cpp
+    src/gui/JsonData.h
+
+    src/gui/lookandfeel/JX11LookAndFeel.h
+    src/gui/lookandfeel/JX11LookAndFeel.cpp
+
+    src/gui/widgets/CustomSlider.h
+    src/gui/widgets/CustomSlider.cpp
+    src/gui/widgets/CustomToggleButton.h
+    src/gui/widgets/CustomToggleButton.cpp
+    src/gui/widgets/TextSwitch.h
+    src/gui/widgets/TextSwitch.cpp
+
+    src/gui/panels/MainPanel.h
+    src/gui/panels/MainPanel.cpp
+    src/gui/panels/OscPanel.h
+    src/gui/panels/OscPanel.cpp
+    src/gui/panels/FilterPanel.h
+    src/gui/panels/FilterPanel.cpp
+)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(BinaryDataTarget "${PROJECT_NAME}-Data")
 juce_add_binary_data(${BinaryDataTarget} SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/data/img/logo.png
+    ${CMAKE_CURRENT_LIST_DIR}/data/fonts/iosevka-regular.ttf
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE ${BinaryDataTarget})
 
@@ -98,6 +138,7 @@ target_compile_definitions(${PROJECT_NAME}
     JUCE_USE_CURL=0
     DONT_SET_USING_JUCE_NAMESPACE=1
     JUCE_VST3_CAN_REPLACE_VST2=0
+    DATA_FOLDER="${CMAKE_CURRENT_LIST_DIR}/data"
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -105,7 +146,9 @@ target_link_libraries(${PROJECT_NAME}
     juce_dsp
     juce_audio_utils
     juce_gui_extra
+    melatonin_inspector
     Melatonin::Perfetto
+    nlohmann_json::nlohmann_json
     PUBLIC
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
