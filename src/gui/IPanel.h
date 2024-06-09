@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/JsonData.h"
+#include "gui/json/Panels.h"
 #include <juce_core/juce_core.h>
 #include <optional>
 #include <unordered_map>

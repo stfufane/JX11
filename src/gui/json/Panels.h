@@ -2,23 +2,25 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <nlohmann/json.hpp>
-#include <string_view>
+#include <string>
 #include <unordered_map>
 
 namespace JX11::Gui::JsonData
 {
-static constexpr std::string_view kPositionsFileName { "gui.json" };
+inline static const std::string kPanelsFileName { "panels.json" };
 
 // TODO add different position types for automatic layout (grid, flex)
-enum PositionType {
+enum class PositionType {
     eAbsolute, // Position in pixels
-    eRelative  // Position in percentage
+    eRelative, // Position in percentage
 };
 
 // Allow PositionType to be serialized to/from JSON
 NLOHMANN_JSON_SERIALIZE_ENUM(PositionType,
-                             { { eAbsolute, "absolute" },
-                               { eRelative, "relative" } })
+                             {
+                                 { PositionType::eAbsolute, "absolute" },
+                                 { PositionType::eRelative, "relative" },
+                             })
 
 struct Position
 {
@@ -30,7 +32,7 @@ using ChildrenPositions = std::unordered_map<std::string, Position>;
 
 inline void from_json(const nlohmann::json& j, juce::Rectangle<int>& r)
 {
-    r = { j.at("x"), j.at("y"), j.at("w"), j.at("h") };
+    r = { j.at("x").get<int>(), j.at("y").get<int>(), j.at("w").get<int>(), j.at("h").get<int>() };
 }
 
 inline void from_json(const nlohmann::json& j, Position& p)

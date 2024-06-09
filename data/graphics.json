@@ -1,0 +1,22 @@
+{
+  "text": [
+    {
+      "text": "Hello, world!",
+      "color": "red",
+      "x": 100,
+      "y": 150,
+      "w": 120,
+      "h": 50
+    }
+  ],
+  "frame": [
+    {
+      "x": 500,
+      "y": 50,
+      "w": 100,
+      "h": 100,
+      "thickness": 2,
+      "color": "blue"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 #include "IPanel.h"
-#include "gui/JsonData.h"
 #include "juce_core/system/juce_PlatformDefs.h"
 #include "melatonin_perfetto/melatonin_perfetto.h"
+#include "json/Panels.h"
 
 namespace JX11::Gui
 {
@@ -28,8 +28,6 @@ void IPanel::recomputeBounds(bool recursive)
                     panel->recomputeBounds(true);
                 }
             }
-        } else {
-            DBG("Could not find bounds for child " + child_name);
         }
     }
 }

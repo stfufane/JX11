@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gui/IGraphics.h"
 #include "gui/lookandfeel/JX11LookAndFeel.h"
 #include "gui/panels/MainPanel.h"
 #include "melatonin_inspector/melatonin_inspector.h"
@@ -22,14 +23,20 @@ public:
     bool keyPressed(const juce::KeyPress& key) final;
 
 private:
-    void loadPositions();
+    void loadPanels();
 
-    nlohmann::json guiJson = nlohmann::json({}); // Init with an empty object instead of null.
+    void loadGraphics();
+
+    std::optional<nlohmann::json> getJsonFromFile(const std::string& inFileName) const;
+
+    nlohmann::json panelsJson = nlohmann::json({}); // Init with an empty object instead of null.
 
     /**
      * @brief The main LookAndFeel that will be applied to all the children components
      */
     JX11LookAndFeel mLookAndFeel;
+
+    IGraphics graphics;
 
     MainPanel mainPanel;
 

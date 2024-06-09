@@ -1,20 +1,22 @@
 #include "PluginEditor.h"
-#include "JsonData.h"
+#include "gui/PluginEditor.h"
 #include "gui/panels/MainPanel.h"
 #include "melatonin_perfetto/melatonin_perfetto.h"
+#include "json/Graphics.h"
+#include "json/Panels.h"
 
 namespace JX11::Gui
 {
 //==============================================================================
 JX11AudioProcessorEditor::JX11AudioProcessorEditor(Processor::JX11AudioProcessor& p)
     : juce::AudioProcessorEditor(&p),
-      mainPanel(p, guiJson),
+      mainPanel(p, panelsJson),
       tooltipWindow(mainPanel.getTooltipPanel(), 50)
 {
     setLookAndFeel(&mLookAndFeel);
     tooltipWindow.setLookAndFeel(&mLookAndFeel);
 
-    addChildAndSetID(&mainPanel, "Main Panel");
+    addAndMakeVisible(mainPanel);
 
     setResizable(true, false);
     setSize(kWindowWidth, kWindowHeight);
@@ -25,7 +27,10 @@ JX11AudioProcessorEditor::JX11AudioProcessorEditor(Processor::JX11AudioProcessor
     setWantsKeyboardFocus(true);
 
     // Load the components positions from the json file.
-    loadPositions();
+    loadPanels();
+
+    // Load the graphics elements that will be painted to the screen.
+    loadGraphics();
 }
 
 JX11AudioProcessorEditor::~JX11AudioProcessorEditor()
@@ -40,6 +45,8 @@ void JX11AudioProcessorEditor::paint(juce::Graphics& g)
 
     g.setColour(findColour(juce::Label::ColourIds::backgroundColourId));
     g.drawRoundedRectangle(getLocalBounds().toFloat().reduced(4.f), 4.f, 1.f);
+
+    graphics.draw(g);
 }
 
 void JX11AudioProcessorEditor::resized()
@@ -51,25 +58,46 @@ void JX11AudioProcessorEditor::resized()
     mainPanel.resized();
 }
 
-void JX11AudioProcessorEditor::loadPositions()
+std::optional<nlohmann::json> JX11AudioProcessorEditor::getJsonFromFile(const std::string& inFileName) const
+{
+    juce::File jsonFile(juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory)
+                            .getChildFile(inFileName));
+
+    if (!jsonFile.existsAsFile()) {
+        jsonFile = juce::File(DATA_FOLDER).getChildFile(inFileName);
+    }
+
+    if (!jsonFile.existsAsFile()) {
+        return std::nullopt;
+    }
+
+    try {
+        return nlohmann::json::parse(jsonFile.loadFileAsString().toStdString());
+    } catch (const std::exception& e) {
+        DBG("getJsonFromFile " + inFileName + " -> " + e.what());
+    }
+
+    return std::nullopt;
+}
+
+void JX11AudioProcessorEditor::loadPanels()
 {
     TRACE_COMPONENT();
 
-    juce::File file(juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory)
-                        .getChildFile(std::string(JsonData::kPositionsFileName)));
-
-    if (!file.existsAsFile()) {
-        file = juce::File(DATA_FOLDER).getChildFile(std::string(JsonData::kPositionsFileName));
+    if (auto panels_json = getJsonFromFile(JsonData::kPanelsFileName); panels_json) {
+        panelsJson = *panels_json;
+        mainPanel.loadDataFromJson();
+        mainPanel.recomputeBounds(true);
     }
+}
 
-    if (file.existsAsFile()) {
-        try {
-            guiJson = nlohmann::json::parse(file.loadFileAsString().toStdString());
-            mainPanel.loadDataFromJson();
-            mainPanel.recomputeBounds(true);
-        } catch (const std::exception& e) {
-            DBG(e.what());
-        }
+void JX11AudioProcessorEditor::loadGraphics()
+{
+    TRACE_COMPONENT();
+
+    if (auto graphicsJson = getJsonFromFile(JsonData::kGraphicsFileName); graphicsJson) {
+        graphics.loadDataFromJson(*graphicsJson);
+        repaint();
     }
 }
 
@@ -77,7 +105,9 @@ bool JX11AudioProcessorEditor::keyPressed(const juce::KeyPress& key)
 {
     if (key.getModifiers().isCtrlDown()) {
         if (key.isKeyCurrentlyDown('R')) {
-            loadPositions();
+            DBG("--- Reload GUI ---");
+            loadPanels();
+            loadGraphics();
             return true;
         }
 

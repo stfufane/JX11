@@ -97,9 +97,13 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/gui/PluginEditor.h
     src/gui/PluginEditor.cpp
     src/gui/AttachedComponent.hpp
+    src/gui/IGraphics.h
+    src/gui/IGraphics.cpp
     src/gui/IPanel.h
     src/gui/IPanel.cpp
-    src/gui/JsonData.h
+
+    src/gui/json/Panels.h
+    src/gui/json/Graphics.h
 
     src/gui/lookandfeel/JX11LookAndFeel.h
     src/gui/lookandfeel/JX11LookAndFeel.cpp
